@@ -32,12 +32,24 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
 # electron
 /release
+
+# onnxruntime-web WASM runtime — regenerated from node_modules by
+# `npm install` (see scripts/copy-onnx-wasm.cjs), not a source asset.
+/public/ort/
+
+# Third-party skill/agent reference bundles (installed via `npx skills
+# add`) — vendored documentation/templates for AI-assisted development,
+# not part of the ORION product.
+/.agents/
+/.claude/skills/
+skills-lock.json
 
 # typescript
 *.tsbuildinfo

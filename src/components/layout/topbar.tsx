@@ -7,14 +7,17 @@ import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { VoicePanel } from "@/components/voice/voice-panel";
+import { LiveVisionPanel } from "@/components/vision/live-vision-panel";
 import { cn } from "@/lib/utils";
 
 export function Topbar({
   authEnabled,
   voiceEnabled,
+  visionEnabled,
 }: {
   authEnabled: boolean;
   voiceEnabled: boolean;
+  visionEnabled: boolean;
 }) {
   return (
     <header className="glass-panel sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-glass-border px-4 md:px-6">
@@ -28,6 +31,7 @@ export function Topbar({
 
       <div className="flex items-center gap-2">
         <VoicePanel enabled={voiceEnabled} />
+        <LiveVisionPanel enabled={visionEnabled} />
 
         <Tooltip>
           <TooltipTrigger

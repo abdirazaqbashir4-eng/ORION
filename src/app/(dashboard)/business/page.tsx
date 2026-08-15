@@ -4,6 +4,12 @@ import { StatTile } from "@/components/dashboard/stat-tile";
 import { DollarSign, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { features } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { MetaAdsPanel } from "@/components/meta/meta-ads-panel";
+import { Megaphone } from "lucide-react";
+
+// Per-user data via the RLS-scoped Supabase client depends on Clerk's
+// auth() (request headers) — never statically prerenderable.
+export const dynamic = "force-dynamic";
 
 async function getMonthToDateTotals() {
   const supabase = createServerSupabaseClient();
@@ -60,6 +66,23 @@ export default async function BusinessPage() {
           phase="Phase 3"
         />
       )}
+
+      <div>
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Megaphone className="h-4 w-4" />
+          Meta Ads
+        </h2>
+        {features.metaAds ? (
+          <MetaAdsPanel />
+        ) : (
+          <EmptyState
+            icon={Megaphone}
+            title="Meta Ads isn't connected"
+            description="Set META_ACCESS_TOKEN and META_AD_ACCOUNT_ID (see /system) to see campaign performance, comparisons, and recommendations here."
+            phase="Meta Ads"
+          />
+        )}
+      </div>
     </div>
   );
 }

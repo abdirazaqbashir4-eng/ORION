@@ -7,6 +7,8 @@ import { saveMemory } from "@/lib/memory/store";
 import { isGmailConnected, getGmailClientForUser } from "@/lib/google/oauth";
 import { listRecentEmails } from "@/lib/google/gmail";
 import { classifyEmails } from "@/lib/ai/email";
+import { listMeetings } from "@/lib/fireflies/client";
+import { parseActionItems } from "@/lib/fireflies/types";
 
 function firstText(res: Anthropic.Messages.Message): string {
   return res.content.find((b): b is Anthropic.Messages.TextBlock => b.type === "text")?.text ?? "";
@@ -66,6 +68,26 @@ export async function runDailyBriefing(userId: string) {
   const calendarSummary = { note: "Calendar integration not yet connected." };
   const newsSummary = { note: "News integration not yet connected." };
 
+  let meetingsSummary: Record<string, unknown> = { note: "Fireflies not connected." };
+  if (features.meetings) {
+    try {
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const meetings = await listMeetings({ fromDate: yesterday, limit: 10 });
+      meetingsSummary = {
+        count: meetings.length,
+        items: meetings.map((m) => ({
+          title: m.title,
+          date: m.dateString,
+          participants: m.participants,
+          overview: m.summary?.overview ?? m.summary?.short_summary ?? null,
+          actionItems: parseActionItems(m.summary?.action_items),
+        })),
+      };
+    } catch (err) {
+      meetingsSummary = { error: err instanceof Error ? err.message : "Failed to load meetings." };
+    }
+  }
+
   let summary = "";
   let recommendations: string[] = [];
 
@@ -79,7 +101,7 @@ export async function runDailyBriefing(userId: string) {
       messages: [
         {
           role: "user",
-          content: JSON.stringify({ emailsSummary, revenueSummary, tasksSummary }),
+          content: JSON.stringify({ emailsSummary, revenueSummary, tasksSummary, meetingsSummary }),
         },
       ],
     });
@@ -103,6 +125,7 @@ export async function runDailyBriefing(userId: string) {
       calendar_summary: calendarSummary,
       news_summary: newsSummary,
       tasks_summary: tasksSummary,
+      meetings_summary: meetingsSummary,
       recommendations,
     },
     { onConflict: "user_id,briefing_date" }

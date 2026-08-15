@@ -8,6 +8,7 @@ import {
   ListChecks,
   Activity,
   Settings,
+  Video,
 } from "lucide-react";
 
 export const siteConfig = {
@@ -43,6 +44,12 @@ export const navItems: NavItem[] = [
     href: "/briefing",
     icon: Sunrise,
     description: "Emails, revenue, calendar, news, and priorities.",
+  },
+  {
+    title: "Meetings",
+    href: "/meetings",
+    icon: Video,
+    description: "Recent meetings, transcripts, and action items.",
   },
   {
     title: "Business",

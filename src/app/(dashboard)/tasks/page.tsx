@@ -12,6 +12,10 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createTask } from "./actions";
 import type { Task } from "@/lib/supabase/types";
 
+// Per-user data via the RLS-scoped Supabase client depends on Clerk's
+// auth() (request headers) — never statically prerenderable.
+export const dynamic = "force-dynamic";
+
 const priorityStyles: Record<Task["priority"], string> = {
   low: "bg-muted text-muted-foreground",
   medium: "bg-orion-cyan/15 text-orion-cyan",

@@ -6,6 +6,10 @@ import { getCurrentUser } from "@/lib/supabase/current-user";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Briefing } from "@/lib/supabase/types";
 
+// Per-user data via the RLS-scoped Supabase client depends on Clerk's
+// auth() (request headers) — never statically prerenderable.
+export const dynamic = "force-dynamic";
+
 function BriefingShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="space-y-6">

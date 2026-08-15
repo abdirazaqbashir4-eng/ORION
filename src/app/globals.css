@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@clerk/ui/themes/shadcn.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -193,5 +194,72 @@
 
   .signal-dot {
     box-shadow: 0 0 8px 2px currentColor;
+  }
+
+  .hud-corner {
+    position: relative;
+  }
+  .hud-corner::before,
+  .hud-corner::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid oklch(0.75 0.15 210 / 50%);
+    pointer-events: none;
+  }
+  .hud-corner::before {
+    top: -1px;
+    left: -1px;
+    border-right: none;
+    border-bottom: none;
+  }
+  .hud-corner::after {
+    bottom: -1px;
+    right: -1px;
+    border-left: none;
+    border-top: none;
+  }
+}
+
+@layer utilities {
+  @keyframes orion-rotate-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes orion-rotate-fast-reverse {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+  @keyframes orion-pulse {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.04);
+    }
+  }
+
+  .orion-core-ring-slow {
+    animation: orion-rotate-slow 22s linear infinite;
+    transform-origin: center;
+  }
+  .orion-core-ring-fast {
+    animation: orion-rotate-fast-reverse 14s linear infinite;
+    transform-origin: center;
+  }
+  .orion-core-pulse {
+    animation: orion-pulse 3.5s ease-in-out infinite;
   }
 }

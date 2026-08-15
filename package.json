@@ -9,12 +9,17 @@
     "start": "next start",
     "lint": "eslint",
     "electron:dev": "concurrently -k -n NEXT,ELECTRON -c blue,magenta \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:pack": "npm run build && electron-builder"
+    "electron:pack": "npm run build && electron-builder",
+    "electron:publish": "npm run build && electron-builder --publish always",
+    "postinstall": "node scripts/copy-onnx-wasm.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
     "@base-ui/react": "^1.7.0",
     "@clerk/nextjs": "^7.7.5",
+    "@clerk/ui": "^1.30.3",
+    "@elevenlabs/elevenlabs-js": "^2.64.0",
+    "@sentry/electron": "^7.16.0",
     "@sentry/nextjs": "^10.70.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
@@ -23,11 +28,14 @@
     "cron-parser": "^5.10.0",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
+    "electron-updater": "^6.8.9",
     "framer-motion": "^13.1.0",
     "googleapis": "^174.0.1",
     "lucide-react": "^1.31.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.51.0",
     "next": "16.3.1",
     "next-themes": "^0.4.6",
+    "onnxruntime-web": "^1.27.0",
     "openai": "^7.4.0",
     "playwright": "^1.62.1",
     "posthog-js": "^1.417.1",
@@ -64,12 +72,18 @@
       "output": "release"
     },
     "files": [
-      "electron/**/*"
+      "electron/**/*",
+      "!**/.env",
+      "!**/.env.*"
     ],
     "extraResources": [
       {
         "from": ".next/standalone",
-        "to": "standalone"
+        "to": "standalone",
+        "filter": [
+          "**/*",
+          "!node_modules"
+        ]
       },
       {
         "from": ".next/static",
@@ -80,6 +94,12 @@
         "to": "standalone/public"
       }
     ],
+    "afterPack": "scripts/electron-after-pack.js",
+    "publish": {
+      "provider": "github",
+      "owner": "abdirazaqbashir4-eng",
+      "repo": "ORION"
+    },
     "win": {
       "target": [
         {

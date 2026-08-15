@@ -1,5 +1,6 @@
 import "server-only";
 import { currentUser } from "@clerk/nextjs/server";
+import { features } from "@/lib/env";
 import { createServerSupabaseClient } from "./server";
 import type { User } from "./types";
 
@@ -8,8 +9,15 @@ import type { User } from "./types";
  * first request. A Clerk `user.created` webhook (Phase 9's webhook
  * infrastructure) would make this eager instead of lazy — this
  * request-time upsert is the simpler bootstrap until that exists.
+ *
+ * Clerk's `currentUser()`/`auth()` only work when `clerkMiddleware()` is
+ * active (see proxy.ts), which itself only runs when `features.auth` is
+ * true — database and auth are configured independently, so this must
+ * not assume one implies the other.
  */
 export async function getCurrentUser(): Promise<User | null> {
+  if (!features.auth) return null;
+
   const clerkUser = await currentUser();
   if (!clerkUser) return null;
 

@@ -12,9 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Electron main/preload processes are plain CommonJS Node scripts.
+    // Electron main/preload processes and build scripts are plain CommonJS Node scripts.
     "electron/**",
+    "scripts/**",
     "release/**",
+    // Third-party skill/agent reference bundles (installed via `npx skills add`),
+    // not app code.
+    ".agents/**",
+    // Vendored onnxruntime-web WASM runtime, copied verbatim from
+    // node_modules by scripts/copy-onnx-wasm.cjs — not our source.
+    "public/ort/**",
   ]),
 ]);
 

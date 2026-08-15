@@ -13,6 +13,7 @@ export function Sidebar() {
       <div className="glass-panel flex h-full flex-col">
         <div className="flex items-center gap-2 px-5 py-6">
           <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-orion-cyan/10">
+            <span className="orion-core-ring-slow absolute inset-0 rounded-full border border-orion-cyan/30" />
             <span className="signal-dot h-2 w-2 rounded-full bg-orion-cyan text-orion-cyan" />
           </div>
           <div className="leading-tight">

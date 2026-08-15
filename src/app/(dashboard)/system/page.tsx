@@ -1,6 +1,7 @@
 import { CheckCircle2, CircleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { env, features } from "@/lib/env";
+import { CircularGauge } from "@/components/dashboard/circular-gauge";
 
 const integrations: { key: keyof typeof features; label: string; envVars: string[] }[] = [
   { key: "auth", label: "Authentication — Clerk", envVars: ["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY"] },
@@ -9,6 +10,14 @@ const integrations: { key: keyof typeof features; label: string; envVars: string
   { key: "voiceStt", label: "Voice — Whisper (STT)", envVars: ["OPENAI_API_KEY"] },
   { key: "voiceTts", label: "Voice — ElevenLabs (TTS)", envVars: ["ELEVENLABS_API_KEY"] },
   { key: "email", label: "Email — Gmail", envVars: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"] },
+  { key: "meetings", label: "Meetings — Fireflies", envVars: ["FIREFLIES_API_KEY"] },
+  { key: "metaAds", label: "Marketing — Meta Ads", envVars: ["META_ACCESS_TOKEN", "META_AD_ACCOUNT_ID"] },
+  { key: "wakeWord", label: "Wake word — openWakeWord", envVars: ["bundled on-device — no API key required"] },
+  {
+    key: "voiceMultilingual",
+    label: "Voice — Azure Speech (Somali/Arabic)",
+    envVars: ["AZURE_SPEECH_KEY", "AZURE_SPEECH_REGION"],
+  },
   { key: "browserAutomation", label: "Browser automation — Playwright", envVars: ["auto-detected (disabled on Vercel)"] },
   { key: "monitoring", label: "Monitoring — Sentry", envVars: ["NEXT_PUBLIC_SENTRY_DSN"] },
   { key: "analytics", label: "Analytics — PostHog", envVars: ["NEXT_PUBLIC_POSTHOG_KEY"] },
@@ -16,17 +25,21 @@ const integrations: { key: keyof typeof features; label: string; envVars: string
 
 export default function SystemPage() {
   const connectedCount = integrations.filter((i) => features[i.key]).length;
+  const connectedPct = Math.round((connectedCount / integrations.length) * 100);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold glow-text">System Monitor</h1>
-        <p className="text-sm text-muted-foreground">
-          Live integration status, derived from environment configuration.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold glow-text">System Monitor</h1>
+          <p className="text-sm text-muted-foreground">
+            Live integration status, derived from environment configuration.
+          </p>
+        </div>
+        <CircularGauge value={connectedPct} valueLabel={`${connectedCount}/${integrations.length}`} label="Connected" size={80} />
       </div>
 
-      <div className="glass-panel rounded-xl p-5">
+      <div className="glass-panel hud-corner rounded-xl p-5">
         <div className="mb-4 flex items-center justify-between">
           <span className="text-sm font-medium">Integrations</span>
           <span className="font-mono text-xs text-muted-foreground">
@@ -67,7 +80,7 @@ export default function SystemPage() {
         </ul>
       </div>
 
-      <div className="glass-panel rounded-xl p-5">
+      <div className="glass-panel hud-corner rounded-xl p-5">
         <span className="text-sm font-medium">Runtime</span>
         <dl className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
           <div>

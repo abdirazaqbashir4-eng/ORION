@@ -60,6 +60,23 @@ const envSchema = z.object({
   NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().default("https://us.i.posthog.com"),
 
+  // Meetings — Fireflies.ai (Phase 14)
+  FIREFLIES_API_KEY: z.string().optional(),
+
+  // Marketing — Meta Marketing API (Phase 15)
+  META_APP_ID: z.string().optional(),
+  META_APP_SECRET: z.string().optional(),
+  META_CLIENT_TOKEN: z.string().optional(),
+  META_ACCESS_TOKEN: z.string().optional(),
+  META_AD_ACCOUNT_ID: z.string().optional(),
+  META_API_VERSION: z.string().default("v21.0"),
+
+  // Voice — Azure Speech (Somali + Arabic STT/TTS) (Phase 16)
+  AZURE_SPEECH_KEY: z.string().optional(),
+  AZURE_SPEECH_REGION: z.string().optional(),
+  AZURE_SPEECH_VOICE_SOMALI: z.string().default("so-SO-MuuseNeural"),
+  AZURE_SPEECH_VOICE_ARABIC: z.string().default("ar-SA-HamedNeural"),
+
   // Security
   ENCRYPTION_SECRET: z.string().optional(),
   CRON_SECRET: z.string().optional(),
@@ -93,4 +110,11 @@ export const features = {
   browserAutomation: !env.VERCEL,
   monitoring: Boolean(env.NEXT_PUBLIC_SENTRY_DSN),
   analytics: Boolean(env.NEXT_PUBLIC_POSTHOG_KEY),
+  meetings: Boolean(env.FIREFLIES_API_KEY),
+  metaAds: Boolean(env.META_ACCESS_TOKEN && env.META_AD_ACCOUNT_ID),
+  // openWakeWord runs entirely on-device (ONNX models bundled under
+  // public/wake-word/) — no account, key, or cloud service required, so
+  // this is unconditionally available unlike every other feature flag here.
+  wakeWord: true,
+  voiceMultilingual: Boolean(env.AZURE_SPEECH_KEY && env.AZURE_SPEECH_REGION),
 } as const;

@@ -5,6 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { features } from "@/lib/env";
 import { getCurrentUser } from "@/lib/supabase/current-user";
 import { listRecentMemories } from "@/lib/memory/store";
+import { WakeWordPanel } from "@/components/voice/wake-word-panel";
+import { UpdatePanel } from "@/components/settings/update-panel";
+
+// Per-user data via the RLS-scoped Supabase client depends on Clerk's
+// auth() (request headers) — never statically prerenderable. UserProfile
+// also renders per-session Clerk UI, which needs the same treatment.
+export const dynamic = "force-dynamic";
 
 async function MemoryPanel() {
   if (!features.database) {
@@ -59,7 +66,11 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      <UpdatePanel />
+
       <MemoryPanel />
+
+      <WakeWordPanel />
 
       {features.auth ? (
         <div className="glass-panel rounded-xl p-1">

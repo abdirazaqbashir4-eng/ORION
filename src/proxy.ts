@@ -27,7 +27,8 @@ export default authConfigured
 
 export const config = {
   matcher: [
-    "/((?!_next|.*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|.*\\.(?:html?|css|js(?!on)|mjs|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|onnx|wasm)).*)",
     "/(api|trpc)(.*)",
+    "/__clerk/:path*",
   ],
 };

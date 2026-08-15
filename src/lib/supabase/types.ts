@@ -105,6 +105,7 @@ export interface Briefing {
   calendar_summary: Record<string, unknown>;
   news_summary: Record<string, unknown>;
   tasks_summary: Record<string, unknown>;
+  meetings_summary: Record<string, unknown>;
   recommendations: unknown[];
   created_at: string;
 }

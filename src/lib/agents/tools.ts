@@ -3,6 +3,8 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { features } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { scrapeUrl, searchWeb } from "@/lib/browser/playwright-runner";
+import { listCampaignsWithInsights } from "@/lib/meta/client";
+import { toCampaignMetrics, identifyUnderperforming } from "@/lib/meta/analysis";
 import type { AgentType } from "./types";
 
 const businessMetricsTool: Anthropic.Tool = {
@@ -34,6 +36,21 @@ const browseWebTool: Anthropic.Tool = {
   },
 };
 
+const adPerformanceTool: Anthropic.Tool = {
+  name: "get_ad_performance",
+  description:
+    "Read the user's real Meta (Facebook/Instagram) ad campaign performance — spend, impressions, clicks, CTR, CPC, CPM, conversions — plus which campaigns are flagged as underperforming relative to the account average. Read-only: this tool cannot pause, resume, create, or modify campaigns. Use it whenever the user asks about ad performance instead of guessing.",
+  input_schema: {
+    type: "object",
+    properties: {
+      date_preset: {
+        type: "string",
+        description: "Meta date preset, e.g. 'last_7d', 'last_30d', 'this_month'. Defaults to last_30d.",
+      },
+    },
+  },
+};
+
 export function getToolsForAgent(agentType: AgentType | "general"): Anthropic.Tool[] {
   const tools: Anthropic.Tool[] = [];
   if (agentType === "business" || agentType === "executive") tools.push(businessMetricsTool);
@@ -42,6 +59,9 @@ export function getToolsForAgent(agentType: AgentType | "general"): Anthropic.To
     features.browserAutomation
   ) {
     tools.push(browseWebTool);
+  }
+  if ((agentType === "marketing" || agentType === "business" || agentType === "executive") && features.metaAds) {
+    tools.push(adPerformanceTool);
   }
   return tools;
 }
@@ -112,6 +132,17 @@ async function executeBrowseWebTool(
   return JSON.stringify(error ? { error } : result);
 }
 
+async function executeAdPerformanceTool(input: { date_preset?: string }): Promise<string> {
+  try {
+    const campaigns = await listCampaignsWithInsights({ datePreset: input.date_preset ?? "last_30d" });
+    const metrics = toCampaignMetrics(campaigns);
+    const underperforming = identifyUnderperforming(metrics);
+    return JSON.stringify({ metrics, underperforming });
+  } catch (err) {
+    return JSON.stringify({ error: err instanceof Error ? err.message : "Failed to load ad performance." });
+  }
+}
+
 export async function executeTool(
   name: string,
   input: unknown,
@@ -122,6 +153,8 @@ export async function executeTool(
       return executeBusinessMetricsTool(input as { start_date: string; end_date: string }, userId);
     case "browse_web":
       return executeBrowseWebTool(input as { mode: "search" | "scrape"; query?: string; url?: string }, userId);
+    case "get_ad_performance":
+      return executeAdPerformanceTool(input as { date_preset?: string });
     default:
       return JSON.stringify({ error: `Unknown tool: ${name}` });
   }
