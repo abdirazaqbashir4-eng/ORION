@@ -98,7 +98,8 @@
     "publish": {
       "provider": "github",
       "owner": "abdirazaqbashir4-eng",
-      "repo": "ORION"
+      "repo": "ORION",
+      "releaseType": "release"
     },
     "win": {
       "target": [
