@@ -1,0 +1,67 @@
+name: Release
+
+# Every push to main: lints, builds, bumps the patch version, and
+# publishes a new GitHub Release with the Windows installer. Every
+# already-installed copy of ORION picks it up automatically via
+# electron-updater (see electron/main.js) — no manual reinstall.
+on:
+  push:
+    branches: [main, orion-full-build]
+
+# Needed to push the version-bump commit back and to create the release.
+permissions:
+  contents: write
+
+# Never run two releases at once — a second push mid-build would race the
+# version bump and publish step.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Cache electron-builder downloads
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\electron-builder\Cache
+          key: electron-builder-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-builder-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Bump patch version
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version patch --no-git-tag-version
+          VERSION=$(node -p "require('./package.json').version")
+          git add package.json package-lock.json
+          git commit -m "chore: release v$VERSION [skip ci]"
+          git push
+
+      # electron:publish runs `next build` then `electron-builder --publish
+      # always` (see package.json) — a failed build/lint step above stops
+      # this from ever running, so a broken change never reaches an
+      # installed copy of ORION.
+      - name: Build and publish desktop release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run electron:publish
